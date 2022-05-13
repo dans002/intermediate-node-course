@@ -12,10 +12,27 @@ const app= express();
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
+const jwt = require('jsonwebtoken');
+const secret = "jsonwebtoken";
+
 app.use(bodyParser.json());
 
 app.listen(port, ()=>{
 	console.log(`server is listening on port:${port}`)
+})
+
+app.route('/login/:email/:password')
+// login
+.put((req,res)=>{
+    User.find({email:req.params.email},
+              (err,data)=>{sendResponse(res,err,data[0],req.params.password,()=>{res.json({success:true, data:jwt.sign({email:req.params.email}, secret)});})}
+              );
+})
+
+// authentication
+.get((req,res)=>{
+    console.log(req.query.token);
+    jwt.verify(req.query.token, secret, (err, data)=>{sendResponse(res,err,data,"",()=>{res.json({success:true, data:'Welcome back ' + data.email})})});
 })
 
 // CREATE
@@ -85,13 +102,12 @@ app.route('/users/:id/:password')
 })
 
 function sendResponse(res,err,data,password,func) {
-//    console.log(`data:${data}`);
+    console.log(`data:${data}`);
     if(err){
         res.json({success:false,message:err});
     } else if(!data) {
         res.json({success:false,message:"Not Found"});
     } else {
-//        console.log(data.password);
         if(!data.password || bcrypt.compareSync(password, data.password)) {
             func();
         } else {
