@@ -15,5 +15,9 @@ const AddressSchema = new mongoose.Schema({
 const User = mongoose.model('User', UserSchema);
 const Address = mongoose.model('Address', AddressSchema);
 
+AddressSchema.pre('save', ()=>{console.log("init")});
+
+
 module.exports.User = User;
 module.exports.Address = Address;
+module.exports.AddressSchema = AddressSchema;
